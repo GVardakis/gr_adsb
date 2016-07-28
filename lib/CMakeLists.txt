@@ -27,6 +27,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 list(APPEND adsb_sources
     preamble_detector_impl.cc
+    adsb_preamble_src_impl.cc
 )
 
 set(adsb_sources "${adsb_sources}" PARENT_SCOPE)

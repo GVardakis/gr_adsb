@@ -18,33 +18,39 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef INCLUDED_ADSB_PREAMBLE_DETECTOR_IMPL_H
-#define INCLUDED_ADSB_PREAMBLE_DETECTOR_IMPL_H
 
-#include <adsb/preamble_detector.h>
+#ifndef INCLUDED_ADSB_ADSB_PREAMBLE_SRC_H
+#define INCLUDED_ADSB_ADSB_PREAMBLE_SRC_H
+
+#include <adsb/api.h>
+#include <gnuradio/sync_block.h>
 
 namespace gr {
   namespace adsb {
 
-    class preamble_detector_impl : public preamble_detector
+    /*!
+     * \brief <+description of block+>
+     * \ingroup adsb
+     *
+     */
+    class ADSB_API adsb_preamble_src : virtual public gr::sync_block
     {
-     private:
-      double d_sampling_rate;
-      double d_frequency;
-      double d_pulse_duration;
-      size_t d_period_samples;
      public:
-      preamble_detector_impl(double sampling_rate, double pulse_duration, double carrier_freq);
-      ~preamble_detector_impl();
+      typedef boost::shared_ptr<adsb_preamble_src> sptr;
 
-      // Where all the action really happens
-      int work(int noutput_items,
-         gr_vector_const_void_star &input_items,
-         gr_vector_void_star &output_items);
+      /*!
+       * \brief Return a shared_ptr to a new instance of adsb::adsb_preamble_src.
+       *
+       * To avoid accidental use of raw pointers, adsb::adsb_preamble_src's
+       * constructor is in a private implementation
+       * class. adsb::adsb_preamble_src::make is the public interface for
+       * creating new instances.
+       */
+      static sptr make(double samp_rate);
     };
 
   } // namespace adsb
 } // namespace gr
 
-#endif /* INCLUDED_ADSB_PREAMBLE_DETECTOR_IMPL_H */
+#endif /* INCLUDED_ADSB_ADSB_PREAMBLE_SRC_H */
 

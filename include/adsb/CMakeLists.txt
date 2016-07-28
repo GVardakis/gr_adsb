@@ -22,5 +22,6 @@
 ########################################################################
 install(FILES
     api.h
-    preamble_detector.h DESTINATION include/adsb
+    preamble_detector.h
+    adsb_preamble_src.h DESTINATION include/adsb
 )

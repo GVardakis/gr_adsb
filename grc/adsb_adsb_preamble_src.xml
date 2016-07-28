@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<block>
+  <name>adsb_preamble_src</name>
+  <key>adsb_adsb_preamble_src</key>
+  <category>adsb</category>
+  <import>import adsb</import>
+  <make>adsb.adsb_preamble_src($sampling_rate)</make>
+  	<param>
+		<name>Vec Length</name>
+		<key>vlen</key>
+		<value>1</value>
+		<type>int</type>
+	</param>
+  	<param>
+		<name>Sampling Rate</name>
+		<key>sampling_rate</key>
+		<type>real</type>
+	</param>
+	<source>
+		<name>out</name>
+		<type>complex</type>
+		<vlen>$vlen</vlen>
+	</source>
+</block>

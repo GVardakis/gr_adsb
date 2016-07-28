@@ -18,5 +18,6 @@
 # Boston, MA 02110-1301, USA.
 
 install(FILES
-    adsb_preamble_detector.xml DESTINATION share/gnuradio/grc/blocks
+    adsb_preamble_detector.xml
+    adsb_adsb_preamble_src.xml DESTINATION share/gnuradio/grc/blocks
 )

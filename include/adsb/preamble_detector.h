@@ -46,7 +46,9 @@ namespace gr {
        * class. adsb::preamble_detector::make is the public interface for
        * creating new instances.
        */
-      static sptr make();
+      static sptr make(double sampling_rate,
+    		  double pulse_duration,
+			  double carrier_freq = 500);
     };
 
   } // namespace adsb

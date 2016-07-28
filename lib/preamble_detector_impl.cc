@@ -29,20 +29,26 @@ namespace gr {
   namespace adsb {
 
     preamble_detector::sptr
-    preamble_detector::make()
+    preamble_detector::make(double sampling_rate, double pulse_duration, double carrier_freq)
     {
       return gnuradio::get_initial_sptr
-        (new preamble_detector_impl());
+        (new preamble_detector_impl(sampling_rate, pulse_duration, carrier_freq));
     }
 
     /*
      * The private constructor
      */
-    preamble_detector_impl::preamble_detector_impl()
+    preamble_detector_impl::preamble_detector_impl(double sampling_rate, double pulse_duration, double carrier_freq)
       : gr::sync_block("preamble_detector",
-              gr::io_signature::make(<+MIN_IN+>, <+MAX_IN+>, sizeof(<+ITYPE+>)),
-              gr::io_signature::make(<+MIN_OUT+>, <+MAX_OUT+>, sizeof(<+OTYPE+>)))
-    {}
+    		  gr::io_signature::make (1, 1, sizeof(gr_complex)),
+    		  gr::io_signature::make (1, 1, sizeof(float))),
+			  d_sampling_rate(sampling_rate),
+			  d_frequency(carrier_freq),
+			  d_pulse_duration(pulse_duration),
+			  d_period_samples()
+    {
+
+    }
 
     /*
      * Our virtual destructor.
@@ -56,8 +62,21 @@ namespace gr {
         gr_vector_const_void_star &input_items,
         gr_vector_void_star &output_items)
     {
-      const <+ITYPE+> *in = (const <+ITYPE+> *) input_items[0];
-      <+OTYPE+> *out = (<+OTYPE+> *) output_items[0];
+      const gr_complex *in = (const gr_complex *) input_items[0];
+      float *out = (float *) output_items[0];
+      for (int i=0;i<noutput_items;i++){
+    	  //out[i] =std::abs(in[i]);
+    	  //printf("%f ",out[i]);
+
+    	  if(std::abs(in[i]) > 3.5)
+    		  out[i] = 1;
+    	  else{
+    		  out[i] = 0;
+    	  }
+    	  printf("%f ",out[i]);
+
+      }
+
 
       // Do <+signal processing+>
 

@@ -18,24 +18,26 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef INCLUDED_ADSB_PREAMBLE_DETECTOR_IMPL_H
-#define INCLUDED_ADSB_PREAMBLE_DETECTOR_IMPL_H
+#ifndef INCLUDED_ADSB_ADSB_PREAMBLE_SRC_IMPL_H
+#define INCLUDED_ADSB_ADSB_PREAMBLE_SRC_IMPL_H
 
-#include <adsb/preamble_detector.h>
+#include <adsb/adsb_preamble_src.h>
 
 namespace gr {
   namespace adsb {
 
-    class preamble_detector_impl : public preamble_detector
+    class adsb_preamble_src_impl : public adsb_preamble_src
     {
      private:
       double d_sampling_rate;
-      double d_frequency;
-      double d_pulse_duration;
-      size_t d_period_samples;
+      size_t d_pulse_duration;
+      size_t d_output_duration;
+      gr_complex* d_preamble;
+      gr_complex* pulse_wave;
+
      public:
-      preamble_detector_impl(double sampling_rate, double pulse_duration, double carrier_freq);
-      ~preamble_detector_impl();
+      adsb_preamble_src_impl(double samp_rate);
+      ~adsb_preamble_src_impl();
 
       // Where all the action really happens
       int work(int noutput_items,
@@ -46,5 +48,5 @@ namespace gr {
   } // namespace adsb
 } // namespace gr
 
-#endif /* INCLUDED_ADSB_PREAMBLE_DETECTOR_IMPL_H */
+#endif /* INCLUDED_ADSB_ADSB_PREAMBLE_SRC_IMPL_H */
 
