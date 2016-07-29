@@ -40,12 +40,16 @@ namespace gr {
      */
     preamble_detector_impl::preamble_detector_impl(double sampling_rate, double pulse_duration, double carrier_freq)
       : gr::sync_block("preamble_detector",
-    		  gr::io_signature::make (1, 1, sizeof(gr_complex)),
-    		  gr::io_signature::make (1, 1, sizeof(float))),
+    		  gr::io_signature::make (1, 1, sizeof(float)),
+    		  gr::io_signature::make2 (2, 2, sizeof(float),sizeof(short int))),
 			  d_sampling_rate(sampling_rate),
 			  d_frequency(carrier_freq),
 			  d_pulse_duration(pulse_duration),
-			  d_period_samples()
+			  d_preamble_bin(3422760960),
+			  d_history(0),
+			  d_receiving(false),
+			  d_conseq_zeros(0),
+			  d_conseq_zeros_lim(3)
     {
 
     }
@@ -62,22 +66,35 @@ namespace gr {
         gr_vector_const_void_star &input_items,
         gr_vector_void_star &output_items)
     {
-      const gr_complex *in = (const gr_complex *) input_items[0];
-      float *out = (float *) output_items[0];
+      const float *in = (const float *) input_items[0];
+      float *out1 = (float *) output_items[0];
+      short int *out2 = (short int *) output_items[1];
+      short int current = 0;
       for (int i=0;i<noutput_items;i++){
-    	  //out[i] =std::abs(in[i]);
-    	  //printf("%f ",out[i]);
-
-    	  if(std::abs(in[i]) > 3.5)
-    		  out[i] = 1;
-    	  else{
-    		  out[i] = 0;
+    	  if(!d_receiving){
+    		  if(in[i] -23 > 0)
+    			  current = 1 ;
+    		  else{
+    			  current = 0;
+    		  }
+    		  d_history = ((d_history<<1) | current) & 0xffffffff;
+    		  //printf("%ld   ",d_history);
+    		  if(d_history == d_preamble_bin){
+    			  out1[i] = 1;
+    			  printf("Hoooooooray!!!!!!!!!!!!");
+    			  d_receiving=true;
+    		  }
+    		  else
+    			  out1[i] = 0;
     	  }
-    	  printf("%f ",out[i]);
+    	  else{
+    		  if(in[i] -23 < 0)
+    			  d_conseq_zeros++;
+    		  if (d_conseq_zeros == d_conseq_zeros_lim)
+    			  d_receiving = false;
 
+    	  }
       }
-
-
       // Do <+signal processing+>
 
       // Tell runtime system how many output items we produced.

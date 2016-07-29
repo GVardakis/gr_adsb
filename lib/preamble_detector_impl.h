@@ -33,6 +33,11 @@ namespace gr {
       double d_frequency;
       double d_pulse_duration;
       size_t d_period_samples;
+      size_t d_preamble_bin;
+      size_t d_history;
+      bool d_receiving;
+      size_t d_conseq_zeros_lim;
+      size_t d_conseq_zeros;
      public:
       preamble_detector_impl(double sampling_rate, double pulse_duration, double carrier_freq);
       ~preamble_detector_impl();
