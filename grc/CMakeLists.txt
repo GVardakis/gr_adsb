@@ -19,5 +19,7 @@
 
 install(FILES
     adsb_preamble_detector.xml
-    adsb_adsb_preamble_src.xml DESTINATION share/gnuradio/grc/blocks
+    adsb_adsb_preamble_src.xml
+    adsb_adsb_demodulator.xml
+    adsb_msg_decoder.xml DESTINATION share/gnuradio/grc/blocks
 )

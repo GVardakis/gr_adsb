@@ -18,39 +18,39 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef INCLUDED_ADSB_PREAMBLE_DETECTOR_IMPL_H
-#define INCLUDED_ADSB_PREAMBLE_DETECTOR_IMPL_H
 
-#include <adsb/preamble_detector.h>
+#ifndef INCLUDED_ADSB_MSG_DECODER_H
+#define INCLUDED_ADSB_MSG_DECODER_H
+
+#include <adsb/api.h>
+#include <gnuradio/sync_block.h>
 
 namespace gr {
   namespace adsb {
 
-    class preamble_detector_impl : public preamble_detector
+    /*!
+     * \brief <+description of block+>
+     * \ingroup adsb
+     *
+     */
+    class ADSB_API msg_decoder : virtual public gr::sync_block
     {
-     private:
-      double d_sampling_rate;
-      double d_frequency;
-      double d_pulse_duration;
-      size_t d_period_samples;
-      size_t d_preamble_bin;
-      size_t d_history;
-      bool d_receiving;
-      size_t d_max_msg_samples;
-      size_t d_samples_count;
-      size_t d_max_msg_time_us;
      public:
-      preamble_detector_impl(double sampling_rate, double pulse_duration, double carrier_freq);
-      ~preamble_detector_impl();
+      typedef boost::shared_ptr<msg_decoder> sptr;
 
-      // Where all the action really happens
-      int work(int noutput_items,
-         gr_vector_const_void_star &input_items,
-         gr_vector_void_star &output_items);
+      /*!
+       * \brief Return a shared_ptr to a new instance of adsb::msg_decoder.
+       *
+       * To avoid accidental use of raw pointers, adsb::msg_decoder's
+       * constructor is in a private implementation
+       * class. adsb::msg_decoder::make is the public interface for
+       * creating new instances.
+       */
+      static sptr make();
     };
 
   } // namespace adsb
 } // namespace gr
 
-#endif /* INCLUDED_ADSB_PREAMBLE_DETECTOR_IMPL_H */
+#endif /* INCLUDED_ADSB_MSG_DECODER_H */
 

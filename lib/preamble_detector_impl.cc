@@ -48,8 +48,9 @@ namespace gr {
 			  d_preamble_bin(3422760960),
 			  d_history(0),
 			  d_receiving(false),
-			  d_conseq_zeros(0),
-			  d_conseq_zeros_lim(3)
+			  d_max_msg_time_us(112),
+			  d_max_msg_samples(112*4),
+			  d_samples_count(0)
     {
 
     }
@@ -69,8 +70,9 @@ namespace gr {
       const float *in = (const float *) input_items[0];
       float *out1 = (float *) output_items[0];
       short int *out2 = (short int *) output_items[1];
-      short int current = 0;
+      uint8_t current = 0;
       for (int i=0;i<noutput_items;i++){
+    	  out2[i] = d_receiving;
     	  if(!d_receiving){
     		  if(in[i] -23 > 0)
     			  current = 1 ;
@@ -80,20 +82,21 @@ namespace gr {
     		  d_history = ((d_history<<1) | current) & 0xffffffff;
     		  //printf("%ld   ",d_history);
     		  if(d_history == d_preamble_bin){
-    			  out1[i] = 1;
     			  printf("Hoooooooray!!!!!!!!!!!!");
     			  d_receiving=true;
     		  }
-    		  else
-    			  out1[i] = 0;
     	  }
     	  else{
-    		  if(in[i] -23 < 0)
-    			  d_conseq_zeros++;
-    		  if (d_conseq_zeros == d_conseq_zeros_lim)
+    		  d_samples_count++;
+    		  if(d_samples_count > d_max_msg_samples){
     			  d_receiving = false;
-
+    			  d_samples_count =0;
+    			  out2[i] = d_receiving;
+    		  }
     	  }
+    	  out1[i] = in[i];
+
+
       }
       // Do <+signal processing+>
 

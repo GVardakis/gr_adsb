@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<block>
+  <name>adsb_demodulator</name>
+  <key>adsb_adsb_demodulator</key>
+  <category>[adsb]</category>
+  <import>import adsb</import>
+  <make>adsb.adsb_demodulator()</make>
+
+  <sink>
+    <name>in</name>
+    <type>float</type>
+  </sink>
+  <sink>
+    <name>trigger</name>
+    <type>short</type>
+  </sink>
+
+</block>

@@ -31,4 +31,9 @@
     <name>out</name>
     <type>float</type>
   </source>
+  <source>
+    <name>trigger</name>
+    <type>short</type>
+  </source>
+  
 </block>

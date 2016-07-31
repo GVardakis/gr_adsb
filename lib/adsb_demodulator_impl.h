@@ -18,30 +18,27 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef INCLUDED_ADSB_PREAMBLE_DETECTOR_IMPL_H
-#define INCLUDED_ADSB_PREAMBLE_DETECTOR_IMPL_H
+#ifndef INCLUDED_ADSB_ADSB_DEMODULATOR_IMPL_H
+#define INCLUDED_ADSB_ADSB_DEMODULATOR_IMPL_H
 
-#include <adsb/preamble_detector.h>
+#include <adsb/adsb_demodulator.h>
 
 namespace gr {
   namespace adsb {
 
-    class preamble_detector_impl : public preamble_detector
+    class adsb_demodulator_impl : public adsb_demodulator
     {
      private:
-      double d_sampling_rate;
-      double d_frequency;
-      double d_pulse_duration;
-      size_t d_period_samples;
-      size_t d_preamble_bin;
-      size_t d_history;
-      bool d_receiving;
-      size_t d_max_msg_samples;
-      size_t d_samples_count;
-      size_t d_max_msg_time_us;
+
+    	size_t d_samps_per_pulse;
+    	size_t d_count;
+    	std::string d_message;
+    	size_t d_bit_one;
+    	size_t d_bit_zero;
+    	size_t d_current_bit;
      public:
-      preamble_detector_impl(double sampling_rate, double pulse_duration, double carrier_freq);
-      ~preamble_detector_impl();
+      adsb_demodulator_impl();
+      ~adsb_demodulator_impl();
 
       // Where all the action really happens
       int work(int noutput_items,
@@ -52,5 +49,5 @@ namespace gr {
   } // namespace adsb
 } // namespace gr
 
-#endif /* INCLUDED_ADSB_PREAMBLE_DETECTOR_IMPL_H */
+#endif /* INCLUDED_ADSB_ADSB_DEMODULATOR_IMPL_H */
 

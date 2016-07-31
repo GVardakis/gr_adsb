@@ -18,30 +18,22 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef INCLUDED_ADSB_PREAMBLE_DETECTOR_IMPL_H
-#define INCLUDED_ADSB_PREAMBLE_DETECTOR_IMPL_H
+#ifndef INCLUDED_ADSB_MSG_DECODER_IMPL_H
+#define INCLUDED_ADSB_MSG_DECODER_IMPL_H
 
-#include <adsb/preamble_detector.h>
+#include <adsb/msg_decoder.h>
 
 namespace gr {
   namespace adsb {
 
-    class preamble_detector_impl : public preamble_detector
+    class msg_decoder_impl : public msg_decoder
     {
      private:
-      double d_sampling_rate;
-      double d_frequency;
-      double d_pulse_duration;
-      size_t d_period_samples;
-      size_t d_preamble_bin;
-      size_t d_history;
-      bool d_receiving;
-      size_t d_max_msg_samples;
-      size_t d_samples_count;
-      size_t d_max_msg_time_us;
+      // Nothing to declare in this block.
+
      public:
-      preamble_detector_impl(double sampling_rate, double pulse_duration, double carrier_freq);
-      ~preamble_detector_impl();
+      msg_decoder_impl();
+      ~msg_decoder_impl();
 
       // Where all the action really happens
       int work(int noutput_items,
@@ -52,5 +44,5 @@ namespace gr {
   } // namespace adsb
 } // namespace gr
 
-#endif /* INCLUDED_ADSB_PREAMBLE_DETECTOR_IMPL_H */
+#endif /* INCLUDED_ADSB_MSG_DECODER_IMPL_H */
 
