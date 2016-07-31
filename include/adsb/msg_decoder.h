@@ -33,7 +33,7 @@ namespace gr {
      * \ingroup adsb
      *
      */
-    class ADSB_API msg_decoder : virtual public gr::sync_block
+    class ADSB_API msg_decoder : virtual public gr::block
     {
      public:
       typedef boost::shared_ptr<msg_decoder> sptr;

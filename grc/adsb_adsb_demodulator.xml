@@ -14,5 +14,9 @@
     <name>trigger</name>
     <type>short</type>
   </sink>
+  <source>
+	<name>msg_out</name>
+	<type>message</type>
+  </source>
 
 </block>

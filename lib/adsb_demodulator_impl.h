@@ -36,6 +36,7 @@ namespace gr {
     	size_t d_bit_one;
     	size_t d_bit_zero;
     	size_t d_current_bit;
+    	pmt::pmt_t d_message_out;
      public:
       adsb_demodulator_impl();
       ~adsb_demodulator_impl();

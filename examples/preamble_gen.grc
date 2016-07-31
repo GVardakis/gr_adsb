@@ -210,7 +210,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(1128, 152)</value>
+      <value>(920, 136)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -219,6 +219,14 @@
     <param>
       <key>id</key>
       <value>adsb_adsb_demodulator_0</value>
+    </param>
+    <param>
+      <key>maxoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>minoutbuf</key>
+      <value>0</value>
     </param>
   </block>
   <block>
@@ -269,6 +277,37 @@
     </param>
   </block>
   <block>
+    <key>adsb_msg_decoder</key>
+    <param>
+      <key>alias</key>
+      <value></value>
+    </param>
+    <param>
+      <key>comment</key>
+      <value></value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(1128, 144)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>id</key>
+      <value>adsb_msg_decoder_0</value>
+    </param>
+  </block>
+  <block>
     <key>adsb_preamble_detector</key>
     <param>
       <key>alias</key>
@@ -288,7 +327,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(832, 146)</value>
+      <value>(672, 148)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -636,7 +675,7 @@ AGC brings them all to the same level.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(672, 344)</value>
+      <value>(640, 344)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -675,7 +714,7 @@ AGC brings them all to the same level.</value>
     </param>
     <param>
       <key>_enabled</key>
-      <value>0</value>
+      <value>1</value>
     </param>
     <param>
       <key>file</key>
@@ -730,7 +769,7 @@ AGC brings them all to the same level.</value>
     </param>
     <param>
       <key>_enabled</key>
-      <value>0</value>
+      <value>1</value>
     </param>
     <param>
       <key>_coordinate</key>
@@ -1418,7 +1457,7 @@ per symbol and the omega is 2, i get one sample per symbol</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(1112, 324)</value>
+      <value>(880, 380)</value>
     </param>
     <param>
       <key>gui_hint</key>
@@ -2925,11 +2964,11 @@ per symbol and the omega is 2, i get one sample per symbol</value>
     </param>
     <param>
       <key>_enabled</key>
-      <value>True</value>
+      <value>0</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(104, 316)</value>
+      <value>(104, 132)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -3085,6 +3124,12 @@ per symbol and the omega is 2, i get one sample per symbol</value>
     </param>
   </block>
   <connection>
+    <source_block_id>adsb_adsb_demodulator_0</source_block_id>
+    <sink_block_id>adsb_msg_decoder_0</sink_block_id>
+    <source_key>msg_out</source_key>
+    <sink_key>message</sink_key>
+  </connection>
+  <connection>
     <source_block_id>adsb_preamble_detector_0</source_block_id>
     <sink_block_id>adsb_adsb_demodulator_0</sink_block_id>
     <source_key>0</source_key>
@@ -3195,12 +3240,6 @@ per symbol and the omega is 2, i get one sample per symbol</value>
   <connection>
     <source_block_id>digital_clock_recovery_mm_xx_0</source_block_id>
     <sink_block_id>qtgui_time_sink_x_0</sink_block_id>
-    <source_key>0</source_key>
-    <sink_key>0</sink_key>
-  </connection>
-  <connection>
-    <source_block_id>pfb_decimator_ccf_0</source_block_id>
-    <sink_block_id>blocks_throttle_0</sink_block_id>
     <source_key>0</source_key>
     <sink_key>0</sink_key>
   </connection>

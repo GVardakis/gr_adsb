@@ -26,8 +26,12 @@
 
 #ifdef gnuradio_adsb_EXPORTS
 #  define ADSB_API __GR_ATTR_EXPORT
+#define MAX_PACKET_TIME 112
 #else
 #  define ADSB_API __GR_ATTR_IMPORT
+
+
+#define MAX_PACKET_TIME 112
 #endif
 
 #endif /* INCLUDED_ADSB_API_H */

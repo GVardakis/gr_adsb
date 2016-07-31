@@ -44,11 +44,12 @@ namespace gr {
               gr::io_signature::make(0,0,0)),
 			  d_samps_per_pulse(2),
 			  d_count(0),
-			  d_message("")
+			  d_message(""),
+			  d_message_out(pmt::mp("msg_out"))
     {
     	d_bit_one = (size_t)((std::floor(std::pow(2,d_samps_per_pulse)))-1) << d_samps_per_pulse;
     	d_bit_zero =(size_t)((std::floor(std::pow(2,d_samps_per_pulse)))-1);
-    	printf("One = %ld zero = %ld\n",d_bit_one ,d_bit_zero);
+    	message_port_register_out(d_message_out);
     }
 
     /*
@@ -98,8 +99,9 @@ namespace gr {
     	  }
     	  else if(trigger[i] ==0){
     		  if (d_message != ""){
-    			  std::cout<<"Message " << d_message << std::endl;
+    			  //std::cout<<"Message " << d_message << std::endl;
     			  //printf("Message: %s\n",d_message);
+    			  message_port_pub(d_message_out,pmt::make_blob(d_message.c_str(),d_message.length()));
     			  d_message = "";
     		  }
     		  d_count = 0;

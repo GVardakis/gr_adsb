@@ -23,17 +23,24 @@
 
 #include <adsb/msg_decoder.h>
 
+
+
 namespace gr {
   namespace adsb {
 
     class msg_decoder_impl : public msg_decoder
     {
      private:
-      // Nothing to declare in this block.
+      pmt::pmt_t d_message_in;
+      std::string d_message;
+      bool d_finished;
+      uint8_t* d_byte_message;
 
      public:
       msg_decoder_impl();
       ~msg_decoder_impl();
+
+      void msg_decoder();
 
       // Where all the action really happens
       int work(int noutput_items,
