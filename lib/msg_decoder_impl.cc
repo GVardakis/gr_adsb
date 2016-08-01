@@ -64,6 +64,8 @@ namespace gr {
     void
 	msg_decoder_impl::msg_decoder()
     {
+	size_t df =0;
+	size_t tc =0;
     	while(!d_finished){
     		pmt::pmt_t msg = delete_head_blocking(d_message_in);
     		const char* message_string = (const char*)pmt::blob_data(msg);
@@ -92,6 +94,9 @@ namespace gr {
     			d_byte_message[i] =  b.to_ulong() & 0xFF;
     			printf("%x ",d_byte_message[i]);
     		}
+    		df = d_byte_message[0] >> 3;
+    		tc = d_byte_message[4] >> 3;
+
 
     	}
     }
