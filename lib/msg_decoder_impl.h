@@ -36,6 +36,8 @@ namespace gr {
       bool d_finished;
       uint8_t* d_byte_message;
 
+
+      size_t altitude_calculation(uint16_t alt);
      public:
       msg_decoder_impl();
       ~msg_decoder_impl();

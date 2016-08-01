@@ -67,38 +67,80 @@ namespace gr {
 	size_t df =0;
 	size_t tc =0;
     	while(!d_finished){
+    		adsb_msg_t message;
     		pmt::pmt_t msg = delete_head_blocking(d_message_in);
     		const char* message_string = (const char*)pmt::blob_data(msg);
     		//std::cout<<"Message is"<< std::string(message_string) << std::endl;
     		std::string bin_message(message_string);
-    		std::cout<< bin_message.substr(0,8)<<" ";
-    		if(bin_message.substr(0,8).find("-1") != -1){
+    		//std::cout<< bin_message.substr(0,8)<<" ";
+    		//printf("found %ld ",bin_message.substr(0,8).find("-"));
+    		if(bin_message.substr(0,8).find("-") != -1){
     			printf("Corrupted bit");
     			continue;
     		}
     		std::bitset<8> b(bin_message.substr(0,8));
     		d_byte_message[0] =  b.to_ulong() & 0xFF;
-    		printf("%x ",d_byte_message[0]);
+    		//printf("%x ",d_byte_message[0]);
     		size_t num_bits = 0;
     		if((d_byte_message[0]>>3) == 0x11)
     			num_bits = 112;
     		else
     			num_bits = 56;
     		for(int i=1; i<num_bits/8; i++){
-    			std::cout<< bin_message.substr(i*8,8)<<" ";
-    			if(bin_message.substr(0,8).find("-1") != -1){
+    			if(bin_message.substr(i*8,8).find("-") != -1){
     				printf("Corrupted bit");
     				continue;
     			}
     			std::bitset<8> b(bin_message.substr(i*8,8));
     			d_byte_message[i] =  b.to_ulong() & 0xFF;
-    			printf("%x ",d_byte_message[i]);
+    			//printf("%x ",d_byte_message[i]);
     		}
-    		df = d_byte_message[0] >> 3;
-    		tc = d_byte_message[4] >> 3;
+    		message.df = d_byte_message[0] >> 3;
+    		message.ca = d_byte_message[0] & 0x07;
+    		message.tc = d_byte_message[4] >> 3;
+    		memcpy(&message.icao24,&d_byte_message[1], 3*sizeof(uint8_t));
+    		memcpy(&message.data,&d_byte_message[4], 7*sizeof(uint8_t));
+    		memcpy(&message.crc,&d_byte_message[11],3*sizeof(uint8_t));
+    		printf("Downlink format %d Message Subtype %d Type Code %d\n",message.df, message.ca, message.tc);
+    		if((message.df == 17) && ((message.tc <= 4) && (message.tc >= 1))){ // Aircraft identification message
+    			std::string fnum ="";
+    			for(int i =0; i < 8; i++){
+    				std::bitset<8> b(bin_message.substr(40 + i*6,6));
+    				uint8_t index =  b.to_ulong() & 0x3F;
+    				fnum+=letter_table[index];
+    			}
+    			std::cout << "Aircraft number is "<<fnum<< std::endl;
+    		}
+    		else if((message.df == 17) && ((message.tc <= 18) && (message.tc >= 9))){
+    			position_t pos;
+    			pos.surv_status = (d_byte_message[5] >> 1) & 0x03;
+    			pos.nic = d_byte_message[5] & 0x01;
+    			pos.altitude = (d_byte_message[6] << 4) | ((d_byte_message[7] >> 4));
+    			pos.time = (d_byte_message[7] >> 3) & 0x01;
+    			pos.frame_flag = (d_byte_message[7] >> 2) & 0x01;
+    			pos.lat_cpr = ((d_byte_message[7] & 0x03) << 15) | (d_byte_message[8] << 7) | ((d_byte_message[9] >> 1));
+    			pos.lon_cpr = ((d_byte_message[9] & 0x01) << 16) | (d_byte_message[10] << 8) | d_byte_message[11];
+    			printf("Flag : %d \n",pos.frame_flag);
+    			altitude_calculation(pos.altitude);
 
+    		}
 
     	}
+    }
+    size_t
+	msg_decoder_impl::altitude_calculation(uint16_t alt){
+    	uint8_t q = (alt >> 4) & 0x01;
+    	uint16_t temp =0;
+    	size_t ret =0;
+    	if(1 == 1){
+    		temp = (((alt >> 5) & 0x7F) << 4) | (alt & 0x0F);
+    		ret = temp*25 - 1000;
+    		printf("Altitude = %ld \n",ret);
+    	}
+    	else{
+    		printf("Bad Luck \n");
+    	}
+    	return ret;
     }
 
   } /* namespace adsb */

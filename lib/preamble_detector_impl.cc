@@ -82,7 +82,6 @@ namespace gr {
     		  d_history = ((d_history<<1) | current) & 0xffffffff;
     		  //printf("%ld   ",d_history);
     		  if(d_history == d_preamble_bin){
-    			  printf("Hoooooooray!!!!!!!!!!!!");
     			  d_receiving=true;
     		  }
     	  }

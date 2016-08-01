@@ -23,7 +23,7 @@
 #define INCLUDED_ADSB_MSG_DECODER_H
 
 #include <adsb/api.h>
-#include <gnuradio/sync_block.h>
+#include <gnuradio/block.h>
 
 namespace gr {
   namespace adsb {
