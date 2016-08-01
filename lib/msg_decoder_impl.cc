@@ -25,6 +25,9 @@
 #include <gnuradio/io_signature.h>
 #include "msg_decoder_impl.h"
 #include <pmt/pmt.h>
+#include <math.h>
+
+#define NZ 15
 
 namespace gr {
   namespace adsb {
@@ -96,10 +99,11 @@ namespace gr {
     		message.df = d_byte_message[0] >> 3;
     		message.ca = d_byte_message[0] & 0x07;
     		message.tc = d_byte_message[4] >> 3;
-    		memcpy(&message.icao24,&d_byte_message[1], 3*sizeof(uint8_t));
+    		message.icao24 = (d_byte_message[1] << 16) | (d_byte_message[2] << 8) | d_byte_message[3];
     		memcpy(&message.data,&d_byte_message[4], 7*sizeof(uint8_t));
     		memcpy(&message.crc,&d_byte_message[11],3*sizeof(uint8_t));
     		printf("Downlink format %d Message Subtype %d Type Code %d\n",message.df, message.ca, message.tc);
+    		printf(" icao %ld \n",message.icao24);
     		if((message.df == 17) && ((message.tc <= 4) && (message.tc >= 1))){ // Aircraft identification message
     			std::string fnum ="";
     			for(int i =0; i < 8; i++){
@@ -119,6 +123,7 @@ namespace gr {
     			pos.lat_cpr = ((d_byte_message[6] & 0x03) << 15) | (d_byte_message[7] << 7) | ((d_byte_message[8] >> 1));
     			pos.lon_cpr = ((d_byte_message[8] & 0x01) << 16) | (d_byte_message[9] << 8) | d_byte_message[10];
     			altitude_calculation(pos.altitude);
+    			//if(d_past_cpr.count())
 
     		}
 
@@ -140,6 +145,13 @@ namespace gr {
     	}
     	return ret;
     }
+
+    uint8_t
+	msg_decoder_impl::compute_nl(size_t lat){
+    	return uint8_t(std::floor((2* M_PI)/(std::acos(1 - ((1 - std::cos(M_PI/(2*NZ)))/std::pow(std::cos((lat*M_PI)/180),2))))));
+    }
+
+
 
   } /* namespace adsb */
 } /* namespace gr */

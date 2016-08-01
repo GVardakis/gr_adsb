@@ -42,7 +42,7 @@ typedef struct{
 	uint8_t df; /* Downlink format */
 	uint8_t tc; /* Type Code */
 	uint8_t ca; /*Message Subtype */
-	uint8_t icao24[3]; /*ICAO aircraft address*/
+	uint32_t icao24; /*ICAO aircraft address*/
 	uint8_t data[7]; /*Data frame*/
 	uint8_t crc[3]; /* CRC */
 }adsb_msg_t;

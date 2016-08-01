@@ -35,9 +35,12 @@ namespace gr {
       std::string d_message;
       bool d_finished;
       uint8_t* d_byte_message;
+      std::map<uint32_t,position_t> d_past_cpr;
 
 
       size_t altitude_calculation(uint16_t alt);
+      uint8_t compute_nl(size_t lat);
+      double latitude_calculation(position_t pos);
      public:
       msg_decoder_impl();
       ~msg_decoder_impl();
