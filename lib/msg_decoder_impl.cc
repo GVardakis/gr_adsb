@@ -70,10 +70,8 @@ namespace gr {
     		adsb_msg_t message;
     		pmt::pmt_t msg = delete_head_blocking(d_message_in);
     		const char* message_string = (const char*)pmt::blob_data(msg);
-    		//std::cout<<"Message is"<< std::string(message_string) << std::endl;
+    		std::cout<<"Message is"<< std::string(message_string) << std::endl;
     		std::string bin_message(message_string);
-    		//std::cout<< bin_message.substr(0,8)<<" ";
-    		//printf("found %ld ",bin_message.substr(0,8).find("-"));
     		if(bin_message.substr(0,8).find("-") != -1){
     			printf("Corrupted bit");
     			continue;
@@ -113,14 +111,13 @@ namespace gr {
     		}
     		else if((message.df == 17) && ((message.tc <= 18) && (message.tc >= 9))){
     			position_t pos;
-    			pos.surv_status = (d_byte_message[5] >> 1) & 0x03;
-    			pos.nic = d_byte_message[5] & 0x01;
-    			pos.altitude = (d_byte_message[6] << 4) | ((d_byte_message[7] >> 4));
-    			pos.time = (d_byte_message[7] >> 3) & 0x01;
-    			pos.frame_flag = (d_byte_message[7] >> 2) & 0x01;
-    			pos.lat_cpr = ((d_byte_message[7] & 0x03) << 15) | (d_byte_message[8] << 7) | ((d_byte_message[9] >> 1));
-    			pos.lon_cpr = ((d_byte_message[9] & 0x01) << 16) | (d_byte_message[10] << 8) | d_byte_message[11];
-    			printf("Flag : %d \n",pos.frame_flag);
+    			pos.surv_status = (d_byte_message[4] >> 1) & 0x03;
+    			pos.nic = d_byte_message[4] & 0x01;
+    			pos.altitude = (d_byte_message[5] << 4) | ((d_byte_message[6] >> 4));
+    			pos.time = (d_byte_message[6] >> 3) & 0x01;
+    			pos.frame_flag = (d_byte_message[6] >> 2) & 0x01;
+    			pos.lat_cpr = ((d_byte_message[6] & 0x03) << 15) | (d_byte_message[7] << 7) | ((d_byte_message[8] >> 1));
+    			pos.lon_cpr = ((d_byte_message[8] & 0x01) << 16) | (d_byte_message[9] << 8) | d_byte_message[10];
     			altitude_calculation(pos.altitude);
 
     		}
@@ -134,6 +131,7 @@ namespace gr {
     	size_t ret =0;
     	if(1 == 1){
     		temp = (((alt >> 5) & 0x7F) << 4) | (alt & 0x0F);
+    		//printf("alt = %ld \n", temp);
     		ret = temp*25 - 1000;
     		printf("Altitude = %ld \n",ret);
     	}
