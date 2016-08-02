@@ -48,6 +48,11 @@ typedef struct{
 }adsb_msg_t;
 
 typedef struct{
+	double latitude;
+	double longitude;
+}coordinates_t;
+
+typedef struct{
 	uint8_t surv_status; /*Surveillance status*/
 	uint8_t nic; /*NIC supplement-B*/
 	uint16_t altitude; /*Altitude*/

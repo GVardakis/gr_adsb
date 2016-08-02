@@ -40,7 +40,14 @@ namespace gr {
 
       size_t altitude_calculation(uint16_t alt);
       uint8_t compute_nl(size_t lat);
-      double latitude_calculation(position_t pos);
+      /**
+       * Function for calculating latitude information.
+       *
+       * @param odd_pos the frame containing the odd flag
+       * @param even_pos the frame containing the even flag
+       * @param latest Indicates which frame came latest: False for the odd frame, true for the even
+       */
+      coordinates_t coordinates_calculation(position_t odd_pos, position_t even_pos, bool latest);
      public:
       msg_decoder_impl();
       ~msg_decoder_impl();

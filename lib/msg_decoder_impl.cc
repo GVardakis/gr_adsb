@@ -28,6 +28,9 @@
 #include <math.h>
 
 #define NZ 15
+#define DLATE 360.0/60
+#define DLATO 360.0/59
+#define ERROR_CODE -200
 
 namespace gr {
   namespace adsb {
@@ -67,21 +70,25 @@ namespace gr {
     void
 	msg_decoder_impl::msg_decoder()
     {
-	size_t df =0;
-	size_t tc =0;
+    	int error = 0;
     	while(!d_finished){
+    		printf("New frame\n");
+    		error=0;
     		adsb_msg_t message;
     		pmt::pmt_t msg = delete_head_blocking(d_message_in);
     		const char* message_string = (const char*)pmt::blob_data(msg);
-    		std::cout<<"Message is"<< std::string(message_string) << std::endl;
+    		//std::cout<<"Message is"<< std::string(message_string) << std::endl;
     		std::string bin_message(message_string);
     		if(bin_message.substr(0,8).find("-") != -1){
     			printf("Corrupted bit");
-    			continue;
+    			error = -1;
+    			break;
     		}
+    		if(error == -1)
+    			continue;
     		std::bitset<8> b(bin_message.substr(0,8));
     		d_byte_message[0] =  b.to_ulong() & 0xFF;
-    		//printf("%x ",d_byte_message[0]);
+    		printf("%x ",d_byte_message[0]);
     		size_t num_bits = 0;
     		if((d_byte_message[0]>>3) == 0x11)
     			num_bits = 112;
@@ -90,20 +97,22 @@ namespace gr {
     		for(int i=1; i<num_bits/8; i++){
     			if(bin_message.substr(i*8,8).find("-") != -1){
     				printf("Corrupted bit");
-    				continue;
+    				error = -1;
+    				break;
     			}
     			std::bitset<8> b(bin_message.substr(i*8,8));
     			d_byte_message[i] =  b.to_ulong() & 0xFF;
-    			//printf("%x ",d_byte_message[i]);
+    			printf("%x ",d_byte_message[i]);
     		}
+    		if(error == -1)
+    			continue;
     		message.df = d_byte_message[0] >> 3;
     		message.ca = d_byte_message[0] & 0x07;
     		message.tc = d_byte_message[4] >> 3;
     		message.icao24 = (d_byte_message[1] << 16) | (d_byte_message[2] << 8) | d_byte_message[3];
     		memcpy(&message.data,&d_byte_message[4], 7*sizeof(uint8_t));
     		memcpy(&message.crc,&d_byte_message[11],3*sizeof(uint8_t));
-    		printf("Downlink format %d Message Subtype %d Type Code %d\n",message.df, message.ca, message.tc);
-    		printf(" icao %ld \n",message.icao24);
+    		//printf("Downlink format %d Message Subtype %d Type Code %d\n",message.df, message.ca, message.tc);
     		if((message.df == 17) && ((message.tc <= 4) && (message.tc >= 1))){ // Aircraft identification message
     			std::string fnum ="";
     			for(int i =0; i < 8; i++){
@@ -115,6 +124,7 @@ namespace gr {
     		}
     		else if((message.df == 17) && ((message.tc <= 18) && (message.tc >= 9))){
     			position_t pos;
+    			size_t altitude =0;
     			pos.surv_status = (d_byte_message[4] >> 1) & 0x03;
     			pos.nic = d_byte_message[4] & 0x01;
     			pos.altitude = (d_byte_message[5] << 4) | ((d_byte_message[6] >> 4));
@@ -122,8 +132,40 @@ namespace gr {
     			pos.frame_flag = (d_byte_message[6] >> 2) & 0x01;
     			pos.lat_cpr = ((d_byte_message[6] & 0x03) << 15) | (d_byte_message[7] << 7) | ((d_byte_message[8] >> 1));
     			pos.lon_cpr = ((d_byte_message[8] & 0x01) << 16) | (d_byte_message[9] << 8) | d_byte_message[10];
-    			altitude_calculation(pos.altitude);
-    			//if(d_past_cpr.count())
+    			altitude = altitude_calculation(pos.altitude); /*Calculate altitude*/
+    			coordinates_t coord;
+    			printf("Icao = %ld flag = %d\n", message.icao24, pos.frame_flag);
+    			position_t even_frame;
+    			position_t odd_frame;
+    			bool latest;
+    			if(d_past_cpr.count(message.icao24) != 0){
+    				position_t past = d_past_cpr.at(message.icao24);
+    				if(past.frame_flag != pos.frame_flag){
+    					if(past.frame_flag){ /*Differentiate between odd and even flags*/
+    						even_frame = pos;
+    						odd_frame = past;
+    						latest = true;
+    					}
+    					else{
+    						even_frame = past;
+    						odd_frame = pos;
+    						latest = false;
+    					}
+						coord = coordinates_calculation(odd_frame,even_frame,latest);
+						if((coord.latitude == ERROR_CODE) || (coord.longitude == ERROR_CODE)){
+							/*Coordinates not calculated*/
+							continue;
+						}
+						printf("Latitude = %lf longitude = %lf altitude = %ld\n",coord.latitude, coord.longitude, altitude);
+    				}
+    				else{
+    					d_past_cpr.erase(message.icao24);
+    					d_past_cpr[message.icao24] = pos;
+    				}
+    			}
+    			else{
+    				d_past_cpr[message.icao24] = pos;
+    			}
 
     		}
 
@@ -138,7 +180,7 @@ namespace gr {
     		temp = (((alt >> 5) & 0x7F) << 4) | (alt & 0x0F);
     		//printf("alt = %ld \n", temp);
     		ret = temp*25 - 1000;
-    		printf("Altitude = %ld \n",ret);
+    		//printf("Altitude = %ld \n",ret);
     	}
     	else{
     		printf("Bad Luck \n");
@@ -148,10 +190,69 @@ namespace gr {
 
     uint8_t
 	msg_decoder_impl::compute_nl(size_t lat){
-    	return uint8_t(std::floor((2* M_PI)/(std::acos(1 - ((1 - std::cos(M_PI/(2*NZ)))/std::pow(std::cos((lat*M_PI)/180),2))))));
+    	double a = 1 - std::cos(M_PI/(2*NZ));
+    	double b = std::pow(std::cos(M_PI/180 * std::abs(lat)),2);
+    	printf("a = %lf b =%lf \n",a,std::cos(M_PI/180 * std::abs(lat)));
+    	return uint8_t(std::floor((2* M_PI)/(std::acos(1 - (a/b)))));
     }
 
-
+    coordinates_t
+	msg_decoder_impl::coordinates_calculation(position_t odd_pos, position_t even_pos, bool latest){
+    	coordinates_t coord;
+    	uint8_t ni;
+    	int nl;
+    	double DLon;
+    	double calc_lon;
+    	int indexM;
+    	double LatE;
+    	double LatO;
+    	double lat_cpr_even = 1.0*even_pos.lat_cpr / pow(2,17);
+    	double lat_cpr_odd = 1.0*odd_pos.lat_cpr / pow(2,17);
+    	double lon_cpr_even = 1.0*even_pos.lon_cpr / pow(2,17);
+    	double lon_cpr_odd = 1.0*odd_pos.lon_cpr / pow(2,17);
+    	int indexJ = int(std::floor(59*lat_cpr_even - 60*lat_cpr_odd + 0.5));
+    	LatE = DLATE*((indexJ%60) + lat_cpr_even);
+    	LatO = DLATO*((indexJ%59) + lat_cpr_odd);
+    	/* For southern hemisphere*/
+    	if(LatE >= 270){
+    		LatE = LatE - 360;
+    	}
+    	if(LatO >= 270){
+    		LatO = LatO - 360;
+    	}
+    	if(compute_nl(LatO) != compute_nl(LatE)){
+    		coord.latitude = ERROR_CODE;
+    		coord.longitude = ERROR_CODE;
+    		return coord; /*The two calculated latitudes fall within different ranges. Error*/
+    	}
+    	if(latest){
+    		coord.latitude = LatE;
+    	}
+    	else{
+    		coord.latitude = LatO;
+    	}
+    	if(latest){
+    		nl =compute_nl(LatE);
+    		printf("NL even = %d\n",nl);
+    		ni = std::max(nl,1);
+    		DLon = 360.0/ni;
+    		indexM = int(std::floor(lon_cpr_even*(nl - 1) - lon_cpr_odd*nl + 0.5));
+    		calc_lon = DLon*(indexM%ni + lon_cpr_even);
+    	}
+    	else{
+    		nl = compute_nl(LatO);
+    		printf("NL odd= %d\n",nl);
+    		ni = std::max(nl-1,1);
+    		DLon = 360.0/ni;
+    		indexM = int(std::floor(lon_cpr_even*(nl - 1) - lon_cpr_odd*nl + 0.5));
+    		calc_lon = DLon*(indexM%ni + lon_cpr_odd);
+    	}
+		if(calc_lon >= 180)
+			coord.longitude = calc_lon -360;
+		else
+			coord.longitude = calc_lon;
+	    return coord;
+    }
 
   } /* namespace adsb */
 } /* namespace gr */
