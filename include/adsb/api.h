@@ -62,4 +62,11 @@ typedef struct{
 	uint32_t lon_cpr; /*Longitude in CPR format*/
 }position_t;
 
+typedef struct{
+	uint8_t subtype;
+	uint8_t ic;
+	uint8_t resv_a;
+	uint8_t nac;
+	uint8_t s_ew;
+};
 #endif /* INCLUDED_ADSB_API_H */

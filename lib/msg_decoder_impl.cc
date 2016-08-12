@@ -122,7 +122,7 @@ namespace gr {
     			}
     			std::cout << "Aircraft number is "<<fnum<< std::endl;
     		}
-    		else if((message.df == 17) && ((message.tc <= 18) && (message.tc >= 9))){
+    		else if((message.df == 17) && ((message.tc <= 18) && (message.tc >= 9))){ // Aircraft Position
     			position_t pos;
     			size_t altitude =0;
     			pos.surv_status = (d_byte_message[4] >> 1) & 0x03;
@@ -165,6 +165,22 @@ namespace gr {
     			}
     			else{
     				d_past_cpr[message.icao24] = pos;
+    			}
+
+    		}
+    		else if((message.df == 17) && (message.tc == 19)){
+    			uint8_t subtype = message.data[0] & 0x07;
+    			switch (subtype){
+    				case 1:
+    					break;
+    				case 2:
+    					break;
+    				case 3:
+    					break;
+    				case 4:
+    					break;
+    				default:
+    					break;
     			}
 
     		}
