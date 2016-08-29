@@ -46,7 +46,7 @@ namespace gr {
        * class. adsb::adsb_demodulator::make is the public interface for
        * creating new instances.
        */
-      static sptr make();
+      static sptr make(double sampling_rate,double threshold);
     };
 
   } // namespace adsb

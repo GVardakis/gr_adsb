@@ -4,7 +4,7 @@
   <key>adsb_preamble_detector</key>
   <category>[adsb]</category>
   <import>import adsb</import>
-  <make>adsb.preamble_detector($samp_rate,$pulse_dur,$center_freq)</make>
+  <make>adsb.preamble_detector($samp_rate,$thres)</make>
 
   <param>
     <name>sampling rate</name>
@@ -12,18 +12,17 @@
     <type>real</type>
   </param>
   <param>
-    <name>pulse duration</name>
-    <key>pulse_dur</key>
-    <type>int</type>
-  </param>
-  <param>
-    <name>center frequency</name>
-    <key>center_freq</key>
-    <type>real</type>
+    <name>Threshold</name>
+    <key>thres</key>
+    <type>float</type>
   </param>
   
   <sink>
     <name>in</name>
+    <type>float</type>
+  </sink>
+   <sink>
+    <name>mov_average</name>
     <type>float</type>
   </sink>
 

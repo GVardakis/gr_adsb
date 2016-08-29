@@ -37,8 +37,10 @@ namespace gr {
     	size_t d_bit_zero;
     	size_t d_current_bit;
     	pmt::pmt_t d_message_out;
+    	double d_threshold;
+    	double d_samp_rate;
      public:
-      adsb_demodulator_impl();
+      adsb_demodulator_impl(double sampling_rate, double threshold);
       ~adsb_demodulator_impl();
 
       // Where all the action really happens

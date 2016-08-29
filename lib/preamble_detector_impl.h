@@ -30,8 +30,7 @@ namespace gr {
     {
      private:
       double d_sampling_rate;
-      double d_frequency;
-      double d_pulse_duration;
+      double d_threshold;
       size_t d_period_samples;
       size_t d_preamble_bin;
       size_t d_history;
@@ -39,8 +38,9 @@ namespace gr {
       size_t d_max_msg_samples;
       size_t d_samples_count;
       size_t d_max_msg_time_us;
+      uint8_t d_samples_per_pulse;
      public:
-      preamble_detector_impl(double sampling_rate, double pulse_duration, double carrier_freq);
+      preamble_detector_impl(double sampling_rate, double threshold);
       ~preamble_detector_impl();
 
       // Where all the action really happens

@@ -4,8 +4,17 @@
   <key>adsb_adsb_demodulator</key>
   <category>[adsb]</category>
   <import>import adsb</import>
-  <make>adsb.adsb_demodulator()</make>
-
+ <make>adsb.adsb_demodulator($samp_rate,$thres)</make>
+  <param>
+    <name>sampling rate</name>
+    <key>samp_rate</key>
+    <type>real</type>
+  </param>
+  <param>
+    <name>Threshold</name>
+    <key>thres</key>
+    <type>float</type>
+  </param>
   <sink>
     <name>in</name>
     <type>float</type>

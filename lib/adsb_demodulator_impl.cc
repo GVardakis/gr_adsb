@@ -29,22 +29,27 @@ namespace gr {
   namespace adsb {
 
     adsb_demodulator::sptr
-    adsb_demodulator::make()
+    adsb_demodulator::make(double sampling_rate, double threshold)
     {
       return gnuradio::get_initial_sptr
-        (new adsb_demodulator_impl());
+        (new adsb_demodulator_impl(sampling_rate, threshold));
     }
 
     /*
      * The private constructor
      */
-    adsb_demodulator_impl::adsb_demodulator_impl()
+    adsb_demodulator_impl::adsb_demodulator_impl(double sampling_rate, double threshold)
       : gr::sync_block("adsb_demodulator",
               gr::io_signature::make2(2, 2, sizeof(float),sizeof(short int)),
               gr::io_signature::make(0,0,0)),
-			  d_samps_per_pulse(2),
+			  d_samps_per_pulse(int(sampling_rate*0.5e-6)),
 			  d_count(0),
 			  d_message(""),
+			  d_current_bit(0),
+			  d_bit_one(0),
+			  d_bit_zero(0),
+			  d_samp_rate(sampling_rate),
+			  d_threshold(threshold),
 			  d_message_out(pmt::mp("msg_out"))
     {
     	d_bit_one = (size_t)((std::floor(std::pow(2,d_samps_per_pulse)))-1) << d_samps_per_pulse;
@@ -71,7 +76,7 @@ namespace gr {
       for(int i=0; i<noutput_items; i++){
     	  if (trigger[i] == 1){
     		  if(d_count<2*d_samps_per_pulse){
-    			  if(in[i] -23 < 0)
+    			  if(in[i] - d_threshold < 0)
     				  current = 0;
     			  else
     				  current = 1;
@@ -89,7 +94,7 @@ namespace gr {
     			  }
     			  d_count = 0;
     			  d_current_bit = 0;
-    			  if(in[i] -23 < 0)
+    			  if(in[i] - d_threshold < 0)
     				  current = 0;
     			  else
     				  current = 1;

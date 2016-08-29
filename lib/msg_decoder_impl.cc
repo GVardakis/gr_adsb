@@ -50,7 +50,8 @@ namespace gr {
               gr::io_signature::make(0, 0, 0),
               gr::io_signature::make(0, 0, 0)),
 			  d_message_in(pmt::mp("message")),
-			  d_finished(false)
+			  d_finished(false),
+			  d_correct_frames(0)
     {
     	message_port_register_in(d_message_in);
     	d_byte_message = (uint8_t*)malloc((MAX_PACKET_TIME/8)*sizeof(uint8_t));
@@ -72,7 +73,6 @@ namespace gr {
     {
     	int error = 0;
     	while(!d_finished){
-    		printf("New frame\n");
     		error=0;
     		adsb_msg_t message;
     		pmt::pmt_t msg = delete_head_blocking(d_message_in);
@@ -80,15 +80,14 @@ namespace gr {
     		//std::cout<<"Message is"<< std::string(message_string) << std::endl;
     		std::string bin_message(message_string);
     		if(bin_message.substr(0,8).find("-") != -1){
-    			printf("Corrupted bit");
+    			printf("Corrupted bit\n");
     			error = -1;
-    			break;
     		}
     		if(error == -1)
     			continue;
     		std::bitset<8> b(bin_message.substr(0,8));
     		d_byte_message[0] =  b.to_ulong() & 0xFF;
-    		printf("%x ",d_byte_message[0]);
+    		//printf("%x ",d_byte_message[0]);
     		size_t num_bits = 0;
     		if((d_byte_message[0]>>3) == 0x11)
     			num_bits = 112;
@@ -102,7 +101,7 @@ namespace gr {
     			}
     			std::bitset<8> b(bin_message.substr(i*8,8));
     			d_byte_message[i] =  b.to_ulong() & 0xFF;
-    			printf("%x ",d_byte_message[i]);
+    			//printf("%x ",d_byte_message[i]);
     		}
     		if(error == -1)
     			continue;
@@ -113,6 +112,8 @@ namespace gr {
     		memcpy(&message.data,&d_byte_message[4], 7*sizeof(uint8_t));
     		memcpy(&message.crc,&d_byte_message[11],3*sizeof(uint8_t));
     		//printf("Downlink format %d Message Subtype %d Type Code %d\n",message.df, message.ca, message.tc);
+    		d_correct_frames += 1;
+    		printf("Correct frames = %ld\n", d_correct_frames);
     		if((message.df == 17) && ((message.tc <= 4) && (message.tc >= 1))){ // Aircraft identification message
     			std::string fnum ="";
     			for(int i =0; i < 8; i++){
@@ -169,8 +170,22 @@ namespace gr {
 
     		}
     		else if((message.df == 17) && (message.tc == 19)){
-    			uint8_t subtype = message.data[0] & 0x07;
-    			switch (subtype){
+    			velocity_t vel;
+    			vel.subtype = message.data[0] & 0x07;
+    			vel.ic = message.data[1] >> 7;
+    			vel.resv_a = (message.data[1] >> 6) & 0x01;
+    			vel.nac = (message.data[1] >> 3) & 0x07;
+    			vel.s_ew = (message.data[1] >> 2) & 0x01;
+    			vel.v_ew = ((message.data[1] & 0x03) << 8) | message.data[2];
+    			vel.s_ns = message.data[3] >> 7;
+    			vel.v_ns = ((message.data[3] & 0x7F) << 3) | (message.data[4] >> 5);
+    			vel.vrsrc = (message.data[4] >> 4) & 0x01;
+    			vel.s_vr = (message.data[4] >> 3) & 0x01;
+    			vel.vr = ((message.data[4] & 0x03) << 6) | (message.data[5] >> 2);
+    			vel.resv_b = message.data[5] & 0x03;
+    			vel.s_dif = message.data[6] >> 7;
+    			vel.dif = message.data[6] & 0x7f;
+    			switch (vel.subtype){
     				case 1:
     					break;
     				case 2:
@@ -268,6 +283,44 @@ namespace gr {
 		else
 			coord.longitude = calc_lon;
 	    return coord;
+    }
+    void
+	msg_decoder_impl::velocity_calculation(velocity_t vel){
+    	size_t v_we =0;
+    	size_t v_sn =0;
+    	double velocity;
+    	double heading;
+    	std::string vert_rate_sign;
+    	std::string measurement_src;
+    	if (vel.s_ns == 1){
+    		v_sn = -1*(vel.v_ns - 1);
+    	}
+    	else{
+    		v_sn = vel.v_ns - 1;
+    	}
+    	if(vel.s_ew == 1){
+    		v_we = -1*(vel.v_ew - 1);
+    	}
+    	else{
+    		v_we = vel.v_ew - 1;
+    	}
+    	velocity = std::sqrt( std::pow(v_sn,2) + std::pow(v_we,2));
+    	heading = atan(1.0*v_we/v_sn) * (360/M_PI);
+    	if (heading < 0)
+    		heading = heading + 360;
+    	if(vel.s_vr)
+    		vert_rate_sign = "down";
+    	else
+    		vert_rate_sign = "up";
+    	if(vel.vrsrc){
+    		measurement_src = "Geometric Altitude change rate";
+    	}
+    	else{
+    		measurement_src = "Baro-pressure altitude change rate";
+    	}
+    	printf("Velocity frame: Velocity = %lf knots, heading = %lf degrees, vertical direction = %s,"
+    			" vertical rate = %d ft/min, measurement: %s\n",
+				velocity,heading,vert_rate_sign,vel.vr,measurement_src);
     }
 
   } /* namespace adsb */

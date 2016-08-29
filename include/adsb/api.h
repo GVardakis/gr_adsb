@@ -23,6 +23,7 @@
 #define INCLUDED_ADSB_API_H
 
 #include <gnuradio/attributes.h>
+#include <stdint.h>
 
 #ifdef gnuradio_adsb_EXPORTS
 #  define ADSB_API __GR_ATTR_EXPORT
@@ -63,10 +64,19 @@ typedef struct{
 }position_t;
 
 typedef struct{
-	uint8_t subtype;
-	uint8_t ic;
-	uint8_t resv_a;
-	uint8_t nac;
-	uint8_t s_ew;
-};
+	uint8_t subtype; // Subtype
+	uint8_t ic; // Intent Change Flag
+	uint8_t resv_a; //Reserved-A
+	uint8_t nac; // Velocity uncertainty
+	uint8_t s_ew; // East-West velocity sign
+	uint16_t v_ew; // East-West velocity
+	uint8_t s_ns; // North-South velocity sign
+	uint16_t v_ns; // North-South velocity
+	uint8_t vrsrc; // Vertical Rate source
+	uint8_t s_vr; // Vertical Rate sign
+	uint16_t vr; // Vertical Rate
+	uint8_t resv_b; // Reserved-B
+	uint8_t s_dif; // Diff from baro alt, sign
+	uint8_t dif; // Diff from baro alt
+}velocity_t;
 #endif /* INCLUDED_ADSB_API_H */

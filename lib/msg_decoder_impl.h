@@ -34,12 +34,14 @@ namespace gr {
       pmt::pmt_t d_message_in;
       std::string d_message;
       bool d_finished;
+      size_t d_correct_frames;
       uint8_t* d_byte_message;
       std::map<uint32_t,position_t> d_past_cpr;
 
 
       size_t altitude_calculation(uint16_t alt);
       uint8_t compute_nl(size_t lat);
+      void velocity_calculation(velocity_t vel);
       /**
        * Function for calculating latitude information.
        *
